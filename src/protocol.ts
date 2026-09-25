@@ -21,6 +21,7 @@ export interface GuildCard {
   twoHand?: boolean;
   equipped?: boolean;
   effect?: string;
+  artPath?: string;
   color: "red" | "black" | "green" | "blue" | "yellow" | "neutral";
 }
 export interface GuildPlayerState {
@@ -44,6 +45,7 @@ export interface GuildState extends BaseRoundState {
   treasureDeck: GuildCard[];
   treasureDiscard: GuildCard[];
   currentMonster: GuildCard | null;
+  revealedDoorCard: GuildCard | null;
   monsterBonuses: number;
   helperId: string | null;
   helperOffer: number;
@@ -79,6 +81,7 @@ export interface DungeonGuildPublicState {
   stage: DungeonGuildStage;
   players: GuildPublicPlayer[];
   currentMonster: GuildCard | null;
+  revealedDoorCard: GuildCard | null;
   monsterBonuses: number;
   helperName: string | null;
   helperOffer: number;

@@ -1,5 +1,7 @@
 node_modules/
 dist/
+public/host/dungeon-guild/cards/
+public/controller/dungeon-guild/cards/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db

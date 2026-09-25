@@ -77,7 +77,7 @@ function dealHand(state: GuildState, playerId: string, count: number, deck: "doo
   return replacePlayer({ ...state, ...(deck === "door" ? { doorDeck: cards, doorDiscard: discard } : { treasureDeck: cards, treasureDiscard: discard }) }, { ...player, hand });
 }
 function beginTurn(state: GuildState): GuildState {
-  let next: GuildState = { ...state, stage: "door", currentMonster: null, monsterBonuses: 0, helperId: null, helperOffer: 0, helpEndsAt: null, faceDownLoot: [], doorCombat: false, roomLooted: false, turnNumber: state.turnNumber + 1 };
+  let next: GuildState = { ...state, stage: "door", currentMonster: null, revealedDoorCard: null, monsterBonuses: 0, helperId: null, helperOffer: 0, helpEndsAt: null, faceDownLoot: [], doorCombat: false, roomLooted: false, turnNumber: state.turnNumber + 1 };
   if (current(next).dead) {
     const reborn = { ...current(next), dead: false, level: 1 };
     next = replacePlayer(next, reborn);
@@ -88,9 +88,10 @@ function beginTurn(state: GuildState): GuildState {
 }
 function openDoor(state: GuildState): GuildState {
   const doorDeck = [...state.doorDeck]; const doorDiscard = [...state.doorDiscard];
-  let next: GuildState = { ...state, doorDeck, doorDiscard, stage: "door" };
+  let next: GuildState = { ...state, doorDeck, doorDiscard, stage: "door", revealedDoorCard: null };
   const card = draw(doorDeck, doorDiscard);
   if (!card) return { ...next, stage: "main", message: "Die Türstapel sind leer. Spiele Ausrüstung, verkaufe Schätze oder beende den Zug." };
+  next = { ...next, revealedDoorCard: card };
   if (card.kind === "monster") return { ...next, stage: "combat", doorCombat: true, currentMonster: card, message: `${current(next).name} öffnet die Tür: ${card.title} (Stärke ${card.level}).` };
   if (card.kind === "curse") {
     next = replacePlayer(next, transferLevel(current(next), -1));
@@ -183,7 +184,7 @@ export const serverGame: ServerGame<GuildState, DungeonGuildInput, DungeonGuildP
     const seed = context.now + context.roundNumber * 7919;
     let state: GuildState = { ...createBaseRoundState("round_intro", context.now, { durationMs: 1500, message: context.language === "en" ? "Build your strength and make for level ten." : "Rüstet euch aus und erreicht Stufe zehn." }), startedAt: null,
       phase: "round_intro", currentIndex: 0, stage: "door", players,
-      doorDeck: shuffle(doors.map((c) => ({ ...c })), seed), doorDiscard: [], treasureDeck: shuffle(treasures.map((c) => ({ ...c })), seed + 1), treasureDiscard: [], currentMonster: null, monsterBonuses: 0, helperId: null, helperOffer: 0, helpEndsAt: null, faceDownLoot: [], doorCombat: false, roomLooted: false, turnNumber: 0, message: "" };
+      doorDeck: shuffle(doors.map((c) => ({ ...c })), seed), doorDiscard: [], treasureDeck: shuffle(treasures.map((c) => ({ ...c })), seed + 1), treasureDiscard: [], currentMonster: null, revealedDoorCard: null, monsterBonuses: 0, helperId: null, helperOffer: 0, helpEndsAt: null, faceDownLoot: [], doorCombat: false, roomLooted: false, turnNumber: 0, message: "" };
     for (const id of playerIds) { state = dealHand(state, id, 4, "door"); state = dealHand(state, id, 4, "treasure"); }
     return state;
   },
@@ -205,7 +206,7 @@ export const serverGame: ServerGame<GuildState, DungeonGuildInput, DungeonGuildP
       if (card.kind === "class") return { ...replacePlayer({ ...state, doorDiscard: [...state.doorDiscard, ...(player.classCard ? [player.classCard] : [])] }, { ...player, hand, classCard: card }), message: `${player.name} wird ${card.title}.` };
       if (card.kind === "race") return { ...replacePlayer({ ...state, doorDiscard: [...state.doorDiscard, ...(player.raceCard ? [player.raceCard] : [])] }, { ...player, hand, raceCard: card }), message: `${player.name} gehört jetzt zum ${card.title}.` };
       if (card.kind === "level") return { ...replacePlayer({ ...state, ...(card.id.startsWith("door-") ? { doorDiscard: [...state.doorDiscard, card] } : { treasureDiscard: [...state.treasureDiscard, card] }) }, transferLevel({ ...player, hand }, 1)), message: `${player.name} steigt eine Stufe auf.` };
-      if (card.kind === "monster") return state.stage === "main" && !state.roomLooted ? { ...replacePlayer(state, { ...player, hand }), stage: "combat", doorCombat: true, currentMonster: card, monsterBonuses: 0, helperId: null, message: `${player.name} provoziert ${card.title} zu einem Kampf!` } : state;
+      if (card.kind === "monster") return state.stage === "main" && !state.roomLooted ? { ...replacePlayer(state, { ...player, hand }), stage: "combat", doorCombat: true, currentMonster: card, revealedDoorCard: card, monsterBonuses: 0, helperId: null, message: `${player.name} provoziert ${card.title} zu einem Kampf!` } : state;
       if (card.kind === "curse") {
         const target = state.players.find((p) => p.id === input.targetId) ?? player;
         const targetNext = transferLevel(target, -1);
@@ -266,7 +267,22 @@ const englishTitles: Record<string, string> = {
   Konfettiorkan: "Confetti Storm", Riesenrübe: "Giant Turnip", Wackelpuddingkanone: "Jelly Cannon", "Tausendjährige Socke": "Thousand-Year Sock", Mutmachmarmelade: "Bravery Jam", Klebeschleim: "Sticky Slime"
 };
 function titleFor(card: GuildCard, en: boolean): string { return en ? englishTitles[card.title] ?? card.title : card.title; }
-function publicCard(card: GuildCard, en: boolean): GuildCard { return en ? { ...card, title: titleFor(card, true) } : card; }
+const englishEffects: Record<string, string> = {
+  "Stolperfluch": "Lose one level.", "Verhexter Helm": "Lose one level.", "Rostige Rüstung": "Lose one level.",
+  "Falsche Wegbeschreibung": "Lose one level.", "Kalte Füße": "Lose one level.", "Verlorener Rucksack": "Lose one level.",
+  "Zauberin": "Class: +2 combat strength.", "Waldläufer": "Class: +1 combat strength.", "Erfinderin": "Class: +1 combat strength.", "Bardin": "Class: +1 combat strength.",
+  "Menschling": "Ancestry: +1 combat strength.", "Waldvolk": "Ancestry: +2 combat strength.", "Bergvolk": "Ancestry: +1 combat strength.", "Wolkenkind": "Ancestry: +1 combat strength.",
+  "Deckelhelm": "Equipment: +2 strength while equipped.", "Kesselpanzer": "Equipment: +3 strength while equipped.", "Siebenmeilen-Socken": "Equipment: +2 strength while equipped.",
+  "Mondspalter": "Equipment: +4 strength while equipped.", "Krabbenklaue": "Equipment: +3 strength while equipped.", "Zauberstab der Umwege": "Equipment: +2 strength while equipped.",
+  "Taschendrache": "Equipment: +3 strength while equipped.", "Glücksamulet": "Equipment: +1 strength while equipped.", "Riesenschlüssel": "Equipment: +5 strength while equipped.",
+  "Tarnumhang": "Equipment: +2 strength while equipped.", "Trampelstiefel": "Equipment: +3 strength while equipped.", "Kronleuchter-Schild": "Equipment: +2 strength while equipped.",
+  "Konfettiorkan": "One-shot in combat: +3 strength.", "Riesenrübe": "One-shot in combat: +4 strength.", "Wackelpuddingkanone": "One-shot in combat: +3 strength.",
+  "Tausendjährige Socke": "One-shot in combat: +4 strength.", "Mutmachmarmelade": "One-shot in combat: +3 strength.", "Klebeschleim": "One-shot in combat: +4 strength."
+};
+function publicCard(card: GuildCard, en: boolean): GuildCard {
+  const effect = en ? englishEffects[card.title] ?? (card.kind === "monster" ? "Defeat it for " + (card.levelReward ?? 1) + " level and " + (card.goldValue ?? 1) + " treasure." : card.kind === "level" ? "Gain one level." : card.effect) : card.effect;
+  return { ...card, title: en ? titleFor(card, true) : card.title, effect, artPath: "/dungeon-guild/cards/" + encodeURIComponent(card.id) + ".svg" };
+}
 function cardFace(card: GuildCard, en = false): CardTableCardState {
   const title = titleFor(card, en);
   return { cardId: card.id, suitId: card.kind, suitSymbol: card.kind === "monster" ? "♟" : card.kind === "item" ? "✦" : card.kind === "curse" ? "☠" : card.kind === "class" ? "♜" : card.kind === "race" ? "◇" : "✧", suitLabel: card.kind, rankLabel: title, color: card.color, centerLabel: title, points: card.bonus ?? card.level };
@@ -291,7 +307,7 @@ function buildPublic(state: GuildState, context: ServerGameContext): DungeonGuil
   const players = state.players.map((p) => ({ id: p.id, name: p.name, color: p.color, connected: p.connected, level: p.level, classCard: p.classCard ? publicCard(p.classCard, en) : null, raceCard: p.raceCard ? publicCard(p.raceCard, en) : null, equipment: p.equipment.map((card) => publicCard(card, en)), handCount: p.hand.length, strength: gearStrength(p) }));
   const stacks = [stack("door-draw", en ? "Doors" : "Türen", state.doorDeck, "draw", true, en), stack("door-discard", en ? "Door discard" : "Tür-Ablage", state.doorDiscard, "discard", false, en), stack("treasure-draw", en ? "Treasure" : "Schätze", state.treasureDeck, "draw", true, en), stack("treasure-discard", en ? "Loot discard" : "Beute-Ablage", state.treasureDiscard, "discard", false, en), ...state.players.map((p) => ({ id: `equipment-${p.id}`, label: `${p.name}: ${en ? "Gear" : "Ausrüstung"}`, count: p.equipment.length + Number(Boolean(p.classCard)) + Number(Boolean(p.raceCard)), cards: [...p.equipment, ...(p.classCard ? [p.classCard] : []), ...(p.raceCard ? [p.raceCard] : [])].map((card) => cardFace(card, en)), kind: "zone" as const, faceDown: false, layout: "spread" as const }))];
   const actions = (playerId: string) => availableActions(state, playerId, en);
-  return { rulesetId: "dungeon-guild", title: en ? "Dungeon Guild" : "Dungeon-Gilde", deckLabel: en ? "Doors & treasure" : "Tür- & Schatzkarten", backStyle: "diamond", cardStyle: "modern", rules: rulesFor(context.language), seats: players.map((p) => ({ playerId: p.id, name: p.name, color: p.color, connected: p.connected, handCount: p.handCount, score: p.level, isActive: p.id === active.id })), stacks, activePlayerId: active.id, activePlayerName: active.name, direction: 1, turnNumber: state.turnNumber, hostActions: actions(active.id), conditionLabel: state.stage, statusMessage: state.message, log: [], gameOver: state.phase === "locked", winnerPlayerId: state.winnerId, winnerName: players.find((p) => p.id === state.winnerId)?.name, stage: state.stage, players, currentMonster: state.currentMonster ? publicCard(state.currentMonster, en) : null, monsterBonuses: state.monsterBonuses, helperName: players.find((p) => p.id === state.helperId)?.name ?? null, helperOffer: state.helperOffer, helpEndsAt: state.helpEndsAt, faceDownLoot: state.faceDownLoot.length, message: state.message };
+  return { rulesetId: "dungeon-guild", title: en ? "Dungeon Guild" : "Dungeon-Gilde", deckLabel: en ? "Doors & treasure" : "Tür- & Schatzkarten", backStyle: "diamond", cardStyle: "modern", rules: rulesFor(context.language), seats: players.map((p) => ({ playerId: p.id, name: p.name, color: p.color, connected: p.connected, handCount: p.handCount, score: p.level, isActive: p.id === active.id })), stacks, activePlayerId: active.id, activePlayerName: active.name, direction: 1, turnNumber: state.turnNumber, hostActions: actions(active.id), conditionLabel: state.stage, statusMessage: state.message, log: [], gameOver: state.phase === "locked", winnerPlayerId: state.winnerId, winnerName: players.find((p) => p.id === state.winnerId)?.name, stage: state.stage, players, currentMonster: state.currentMonster ? publicCard(state.currentMonster, en) : null, revealedDoorCard: state.revealedDoorCard ? publicCard(state.revealedDoorCard, en) : null, monsterBonuses: state.monsterBonuses, helperName: players.find((p) => p.id === state.helperId)?.name ?? null, helperOffer: state.helperOffer, helpEndsAt: state.helpEndsAt, faceDownLoot: state.faceDownLoot.length, message: state.message };
 }
 function buildController(state: GuildState, context: ServerGameContext, playerId: string) {
   const publicState = buildPublic(state, context); const player = state.players.find((p) => p.id === playerId);

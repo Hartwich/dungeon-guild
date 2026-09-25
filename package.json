@@ -16,7 +16,7 @@
     "./controller": { "types": "./dist/controller/index.d.ts", "import": "./dist/controller/index.js" }
   },
   "files": ["dist", "README.md"],
-  "scripts": { "build": "tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit", "dev": "npm run typecheck" },
+  "scripts": { "build": "node scripts/generate-card-art.mjs && tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit", "dev": "npm run typecheck" },
   "peerDependencies": { "@open-party-lab/game-core": "0.1.0", "@open-party-lab/protocol": "0.1.0", "phaser": "^3.90.0" },
   "peerDependenciesMeta": {
     "@open-party-lab/game-core": { "optional": true },

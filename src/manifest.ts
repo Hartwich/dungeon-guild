@@ -8,7 +8,7 @@ export const dungeonGuildManifest = {
   maxPlayers: 6,
   hostView: "DungeonGuildHostScene",
   controllerView: "dungeon-guild",
-  controllerLayout: "card_hand",
+  controllerLayout: "dungeon_guild",
   supportsTeams: false,
   estimatedRoundDurationMs: 1_200_000,
   roundCompletionMode: "wait_for_ready",
