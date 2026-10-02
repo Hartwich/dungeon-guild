@@ -6,6 +6,10 @@ import type {
 import type { BaseRoundState } from "@open-party-lab/game-core";
 
 export type DungeonGuildStage = "door" | "combat" | "help" | "loot" | "main" | "finished";
+export type GuildCombatSide = "party" | "monster";
+export interface GuildPlayOptions { combatSide?: GuildCombatSide; itemMode?: "equip" | "store"; targetId?: string; }
+export interface GuildTablePlay { id: string; card: GuildCard; playerId: string; playerName: string; combatSide?: GuildCombatSide; playedAt: number; }
+export interface GuildEscapeEvent { id: string; playerName: string; roll: number; target: number; success: boolean; badStuff: GuildCard["badStuff"]; occurredAt: number; }
 export interface GuildCard {
   id: string;
   title: string;
@@ -46,7 +50,14 @@ export interface GuildState extends BaseRoundState {
   treasureDiscard: GuildCard[];
   currentMonster: GuildCard | null;
   revealedDoorCard: GuildCard | null;
+  doorRevealNumber: number;
+  tablePlays: GuildTablePlay[];
+  playNumber: number;
+  lastEscape: GuildEscapeEvent | null;
+  escapeNumber: number;
+  partyBonuses: number;
   monsterBonuses: number;
+  combatEndsAt: number | null;
   helperId: string | null;
   helperOffer: number;
   helpEndsAt: number | null;
@@ -82,7 +93,14 @@ export interface DungeonGuildPublicState {
   players: GuildPublicPlayer[];
   currentMonster: GuildCard | null;
   revealedDoorCard: GuildCard | null;
+  doorRevealNumber: number;
+  tablePlays: GuildTablePlay[];
+  lastEscape: GuildEscapeEvent | null;
+  partyBonuses: number;
   monsterBonuses: number;
+  partyStrength: number;
+  monsterStrength: number;
+  combatEndsAt: number | null;
   helperName: string | null;
   helperOffer: number;
   helpEndsAt: number | null;
@@ -108,4 +126,4 @@ export interface DungeonGuildHandCard extends CardTableHandCardState {
 export type DungeonGuildClientState = DungeonGuildControllerState;
 export type DungeonGuildInput =
   | { type: "dungeon-guild:action"; playerId: string; actionId: string; sentAt: number }
-  | { type: "dungeon-guild:play"; playerId: string; cardId: string; targetId?: string; sentAt: number };
+  | ({ type: "dungeon-guild:play"; playerId: string; cardId: string; sentAt: number } & GuildPlayOptions);

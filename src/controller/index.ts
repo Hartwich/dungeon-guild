@@ -1,6 +1,6 @@
 import type { ControllerLayoutKey } from "@open-party-lab/game-core";
 import { dungeonGuildManifest } from "../manifest.js";
-import type { DungeonGuildClientState, DungeonGuildInput, GuildCard } from "../protocol.js";
+import type { DungeonGuildClientState, DungeonGuildInput, GuildCard, GuildPlayOptions } from "../protocol.js";
 
 interface ControllerContext {
   state: {
@@ -25,6 +25,7 @@ function layoutCard(card: GuildCard, playable = false, hint?: string) {
     badStuff: card.badStuff,
     goldValue: card.goldValue,
     slot: card.slot,
+    twoHand: card.twoHand,
     equipped: card.equipped,
     playable,
     hint
@@ -39,7 +40,6 @@ export const controllerGame = {
     const game = (state.game?.state ?? {}) as Partial<DungeonGuildClientState>;
     const en = state.room?.language === "en";
     const own = game.players?.find((player) => player.id === playerId);
-    const active = game.activePlayerId === playerId;
     const isPlaying = state.game?.phase === "playing";
     const input = (value: DungeonGuildInput) => onInput({ ...value, playerId, sentAt: Date.now() });
     return {
@@ -60,12 +60,11 @@ export const controllerGame = {
       equipment: (own?.equipment ?? []).map((card) => layoutCard(card)),
       hand: (game.hand ?? []).map((card) => layoutCard(card.guildCard, card.playable, card.hint)),
       actions: game.actions ?? [],
-      message: game.message ?? state.game?.message,
       lastError: game.lastError,
       gameOver: Boolean(game.gameOver),
       winnerName: game.winnerName,
-      onPlayCard(cardId: string) {
-        input({ type: "dungeon-guild:play", playerId, cardId, sentAt: Date.now() });
+      onPlayCard(cardId: string, options: GuildPlayOptions = {}) {
+        input({ ...options, type: "dungeon-guild:play", playerId, cardId, sentAt: Date.now() });
       },
       onAction(actionId: string) {
         input({ type: "dungeon-guild:action", playerId, actionId, sentAt: Date.now() });

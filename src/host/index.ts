@@ -9,6 +9,11 @@ const style = `
 @keyframes dg-monster-arrive{from{opacity:0;transform:translateY(24px) scale(.78) rotate(-4deg)}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}@keyframes dg-flash{0%{box-shadow:0 0 0 #e3ba66}35%{box-shadow:0 0 42px #e3ba6670}100%{box-shadow:0 15px 48px #0005}}.dg-encounter.is-revealing{animation:dg-flash .8s ease-out both}.dg-player.is-active .dg-level{box-shadow:0 0 22px #dfa95655}.dg-player.is-active .dg-player-main strong{color:#f4d79b}
 @media(max-width:960px){.dg{padding:12px}.dg-board{grid-template-columns:minmax(0,1fr) 220px;gap:10px}.dg-roster{grid-template-columns:repeat(2,minmax(0,1fr))}.dg-player{min-height:82px;padding:7px}.dg-encounter{grid-template-columns:1fr;grid-template-rows:minmax(180px,.9fr) auto;gap:8px;padding:12px}.dg-door-scene{min-height:180px}.dg-door-placeholder,.dg-door-card{min-height:170px}.dg-door-card{height:100%}.dg-encounter-copy{text-align:center}.dg-monster-stats{justify-content:center}}
 @media(max-width:660px){.dg-board{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}.dg-main{grid-template-rows:auto minmax(190px,1fr)}.dg-roster{grid-template-columns:repeat(2,minmax(0,1fr))}.dg-player{grid-template-columns:36px minmax(0,1fr);min-height:66px;gap:3px 7px;padding:5px}.dg-level{width:34px;height:38px;font-size:17px}.dg-player-main strong{font-size:12px}.dg-player-meta{display:none}.dg-loadout{min-height:24px;margin-top:0}.dg-gear-icon{width:25px;height:25px;flex-basis:25px}.dg-gear-icon img{width:22px;height:22px}.dg-encounter{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);grid-template-rows:1fr;min-height:190px}.dg-door-scene{min-height:170px}.dg-door-card{min-height:155px}.dg-door-placeholder{min-height:155px}.dg-encounter h2{font-size:clamp(22px,5vw,35px)}.dg-encounter p{font-size:12px}.dg-side{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:7px}.dg-message{grid-column:1/-1;padding:8px 10px;font-size:14px}.dg-rules{grid-column:1/-1;max-height:18vh}.dg-support{padding-top:7px}.dg-pile{min-height:48px}.dg-foot{font-size:8px}}
+.dg-door-card img{animation:none}.dg-door-scene.is-revealing .dg-door-left{animation:dg-door-open-left .95s cubic-bezier(.22,.72,.22,1) both;animation-delay:var(--dg-door-delay,0s)}.dg-door-scene.is-revealing .dg-door-right{animation:dg-door-open-right .95s cubic-bezier(.22,.72,.22,1) both;animation-delay:var(--dg-door-delay,0s)}.dg-door-scene.is-revealing .dg-door-card img{animation:dg-monster-arrive .55s ease-out both;animation-delay:calc(.3s + var(--dg-door-delay,0s))}.dg-door-leaf{transform-style:preserve-3d}.dg-door-leaf::before{content:"";position:absolute;inset:12px;border:2px solid #a87b443b;box-shadow:inset 0 0 0 3px #1d140c80}.dg-door-scene::after{content:"";position:absolute;inset:3% 6%;border:7px solid #382617;border-radius:15px;box-shadow:inset 0 0 15px #000b;pointer-events:none}
+.dg-side{grid-template-rows:auto auto minmax(0,1fr) auto}.dg-support{min-height:0;overflow:auto}.dg-table-plays{display:grid;gap:7px}.dg-table-play{display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:8px;min-height:75px;padding:6px 7px;border-bottom:1px solid #b08b484d;background:#ffffff06}.dg-table-play img{width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 4px #0007)}.dg-table-play small{display:block;color:#b8a789;font:700 9px system-ui}.dg-table-play strong{display:block;margin:4px 0;color:#f0d6a6;font:600 15px/1.05 Georgia,serif}.dg-table-play p{color:#d8b777;font:800 10px system-ui}.dg-table-play.is-monster p{color:#efa78e}.dg-table-play.is-new{animation:dg-card-to-table .5s cubic-bezier(.14,.75,.25,1) both}.dg-table-empty{padding:18px 0;color:#9c896a;font:italic 12px Georgia,serif}.dg-combat-window{display:flex;align-items:center;gap:9px;margin-top:5px;padding:9px 12px;border-left:3px solid #e8b866;background:#a9723230;color:#f5d699;font:800 12px system-ui}.dg-combat-countdown{min-width:34px;font:700 24px Georgia,serif}.dg-equipped-slot{display:grid;justify-items:center;gap:3px;min-width:0}.dg-equipped-slot>small{color:#b8a07b;font:700 7px system-ui}.dg-slot-items{display:flex;gap:3px}.dg-equipped-slot .dg-gear-icon{width:24px;height:24px;flex-basis:24px}.dg-equipped-slot .dg-gear-icon img{width:23px;height:23px}.dg-equipped-slot .dg-gear-icon small{font-size:7px;min-width:12px;height:12px}.dg-gear-icon.is-empty{color:#806847;border-style:dashed;opacity:.5}.dg-loadout{overflow:visible;justify-content:space-between;padding-bottom:3px;gap:4px}
+.dg-escape{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:12px;padding:10px;border:1px solid #94723f;border-radius:12px;background:#211c16;margin-bottom:9px}.dg-escape.is-success{border-color:#8caa73}.dg-escape.is-failure{border-color:#b56851}.dg-die{position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px;width:60px;height:60px;padding:10px;border:2px solid #efca87;border-radius:12px;background:linear-gradient(140deg,#f7e8c6,#c6a470);box-shadow:0 6px 10px #0006;transform:rotate(-5deg)}.dg-die .pip{width:8px;height:8px;align-self:center;justify-self:center;border-radius:50%;background:#3a291b;opacity:0}.dg-die[data-face="1"] .pip5,.dg-die[data-face="2"] .pip1,.dg-die[data-face="2"] .pip9,.dg-die[data-face="3"] .pip1,.dg-die[data-face="3"] .pip5,.dg-die[data-face="3"] .pip9,.dg-die[data-face="4"] .pip1,.dg-die[data-face="4"] .pip3,.dg-die[data-face="4"] .pip7,.dg-die[data-face="4"] .pip9,.dg-die[data-face="5"] .pip1,.dg-die[data-face="5"] .pip3,.dg-die[data-face="5"] .pip5,.dg-die[data-face="5"] .pip7,.dg-die[data-face="5"] .pip9,.dg-die[data-face="6"] .pip1,.dg-die[data-face="6"] .pip3,.dg-die[data-face="6"] .pip4,.dg-die[data-face="6"] .pip6,.dg-die[data-face="6"] .pip7,.dg-die[data-face="6"] .pip9{opacity:1}.dg-escape-copy small{display:block;color:#bca984;font:700 10px system-ui}.dg-escape-result strong{display:block;margin:4px 0;color:#e7d5b2;font:700 15px Georgia,serif}.is-success .dg-escape-result strong{color:#c1d6a4}.is-failure .dg-escape-result strong{color:#efa78e}.dg-escape-result p{color:#c5b594;font:10px/1.3 system-ui}.dg-escape-pending{display:none;color:#e0ba76;font:700 14px Georgia,serif}.dg-escape.is-rolling .dg-die{animation:dg-dice-roll 1.2s ease-out both;animation-delay:var(--dg-roll-delay,0s)}.dg-escape.is-rolling .dg-escape-result{visibility:hidden}.dg-escape.is-rolling .dg-escape-pending{display:block;position:absolute;margin-top:8px}.dg-support h3{margin:0 0 3px}
+@keyframes dg-door-open-left{from{transform:rotateY(0)}to{transform:rotateY(-112deg)}}@keyframes dg-door-open-right{from{transform:rotateY(0)}to{transform:rotateY(112deg)}}@keyframes dg-card-to-table{from{opacity:0;transform:translateX(50px) translateY(-18px) rotate(8deg) scale(.75)}to{opacity:1;transform:translateX(0) translateY(0) rotate(0) scale(1)}}@keyframes dg-dice-roll{0%{transform:translateY(-20px) rotate(-180deg) scale(.6)}30%{transform:translateY(4px) rotate(100deg) scale(1.05)}55%{transform:translateY(-8px) rotate(-55deg)}80%{transform:translateY(2px) rotate(15deg)}100%{transform:translateY(0) rotate(-5deg)}}
+@media(max-width:660px){.dg-side{grid-template-rows:auto auto auto}.dg-support{max-height:360px}.dg-table-play{grid-template-columns:48px minmax(0,1fr);min-height:61px}.dg-table-play img{width:48px;height:48px}.dg-table-play strong{font-size:12px}}
 @media(prefers-reduced-motion:reduce){.dg *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}`;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -27,7 +32,7 @@ function image(src: string | undefined, alt: string, className: string): HTMLIma
   return node;
 }
 
-type Cue = "door" | "combat" | "escape";
+type Cue = "door" | "combat" | "escape" | "escape-failed";
 let audioContext: AudioContext | null = null;
 
 function playCue(cue: Cue): void {
@@ -59,9 +64,12 @@ function playCue(cue: Cue): void {
       note(180, 0.16, "triangle", 0, 90, 0.08);
       note(310, 0.12, "square", 0.06, 140, 0.035);
       note(74, 0.23, "sine", 0.12, 42, 0.055);
-    } else {
+    } else if (cue === "escape") {
       note(320, 0.16, "sine", 0, 520, 0.045);
       note(520, 0.28, "triangle", 0.11, 760, 0.05);
+    } else {
+      note(220, 0.2, "triangle", 0, 160, 0.055);
+      note(150, 0.4, "sawtooth", 0.16, 55, 0.045);
     }
   } catch {
     // Host audio is an enhancement; a browser without Web Audio keeps the same game feedback.
@@ -76,7 +84,8 @@ function badge(card: GuildCard, en: boolean): HTMLElement {
   return node;
 }
 
-function draw(root: HTMLElement, app: HostState, en: boolean, reveal: boolean): void {
+interface Motion { doorElapsed?: number; newPlayId?: string; rollElapsed?: number; }
+function draw(root: HTMLElement, app: HostState, en: boolean, motion: Motion): void {
   const state = app.game?.state as DungeonGuildPublicState | undefined;
   if (!state) { root.replaceChildren(); return; }
   const currentCard = state.currentMonster ?? state.revealedDoorCard;
@@ -110,23 +119,33 @@ function draw(root: HTMLElement, app: HostState, en: boolean, reveal: boolean): 
     if (player.classCard) meta.append(badge(player.classCard, en));
     if (player.raceCard) meta.append(badge(player.raceCard, en));
     const loadout = el("div", "dg-loadout");
-    if (player.equipment.length) {
-      for (const item of player.equipment) {
+    const slots: Array<[string, string]> = [["head", en ? "Head" : "Kopf"], ["body", en ? "Body" : "Körper"], ["hands", en ? "Hands" : "Hände"], ["feet", en ? "Feet" : "Füße"], ["other", en ? "Extra" : "Extra"]];
+    for (const [slot, label] of slots) {
+      const place = el("span", "dg-equipped-slot");
+      place.append(el("small", undefined, label));
+      const items = el("span", "dg-slot-items");
+      const equipped = player.equipment.filter((item) => item.equipped !== false && item.slot === slot);
+      for (const item of equipped) {
         const icon = el("span", "dg-gear-icon");
+        icon.title = label + ": " + item.title + (item.twoHand ? (en ? " · both hands" : " · beide Hände") : "");
         const img = image(item.artPath, "", "");
         if (img) icon.append(img);
-        if (item.equipped !== false) icon.append(el("small", undefined, "+" + (item.bonus ?? 0)));
-        loadout.append(icon);
+        icon.append(el("small", undefined, "+" + (item.bonus ?? 0)));
+        items.append(icon);
       }
-    } else {
-      loadout.append(el("span", "dg-gear-empty", en ? "No gear yet" : "Noch keine Ausrüstung"));
+      if (!equipped.length) items.append(el("span", "dg-gear-icon is-empty", "·"));
+      place.append(items); loadout.append(place);
     }
+    const backpackCount = player.equipment.filter((item) => item.equipped === false).length;
+    if (backpackCount) meta.append(el("span", "dg-player-badge", (en ? "Backpack " : "Rucksack ") + backpackCount));
     tile.append(level, playerMain, meta, loadout);
     roster.append(tile);
   }
 
-  const encounter = el("section", "dg-encounter" + (reveal ? " is-revealing" : ""));
-  const scene = el("div", "dg-door-scene" + (currentCard ? " is-open" : ""));
+  const reveal = motion.doorElapsed !== undefined;
+  const encounter = el("section", "dg-encounter");
+  const scene = el("div", "dg-door-scene" + (currentCard ? " is-open" : "") + (reveal ? " is-revealing" : ""));
+  if (reveal) scene.style.setProperty("--dg-door-delay", `-${motion.doorElapsed! / 1000}s`);
   if (currentCard) {
     const face = el("div", "dg-door-card");
     const img = image(currentCard.artPath, currentCard.title, "");
@@ -152,15 +171,19 @@ function draw(root: HTMLElement, app: HostState, en: boolean, reveal: boolean): 
     copy.append(el("p", undefined, details));
     const stats = el("div", "dg-monster-stats");
     if (currentCard.level !== undefined) {
-      const strengthStat = el("div", "dg-stat"); strengthStat.append(el("small", undefined, en ? "Monster strength" : "Monsterstärke"), el("b", undefined, String(currentCard.level))); stats.append(strengthStat);
+      const strengthStat = el("div", "dg-stat"); strengthStat.append(el("small", undefined, en ? "Monster strength" : "Monsterstärke"), el("b", undefined, String(state.currentMonster ? state.monsterStrength : currentCard.level))); stats.append(strengthStat);
     }
     if (currentCard.kind === "monster") {
-      const party = state.players.find((player) => player.id === state.activePlayerId);
-      const partyStat = el("div", "dg-stat"); partyStat.append(el("small", undefined, en ? "Party strength" : "Gruppenstärke"), el("b", undefined, "+" + (party?.strength ?? 0) + (state.monsterBonuses ? " +" + state.monsterBonuses : ""))); stats.append(partyStat);
+      const partyStat = el("div", "dg-stat"); partyStat.append(el("small", undefined, en ? "Party strength" : "Gruppenstärke"), el("b", undefined, String(state.partyStrength))); stats.append(partyStat);
       const escapeStat = el("div", "dg-stat"); escapeStat.append(el("small", undefined, en ? "Escape roll" : "Fluchtwurf"), el("b", undefined, (currentCard.escapeTarget ?? 5) + "+")); stats.append(escapeStat);
     }
     copy.append(stats);
     if (state.currentMonster && state.helperName) copy.append(el("span", "dg-event-badge", (en ? "Helper" : "Hilfe") + ": " + state.helperName));
+    if (state.combatEndsAt) {
+      const window = el("div", "dg-combat-window");
+      const clock = el("b", "dg-combat-countdown"); clock.dataset.deadline = String(state.combatEndsAt);
+      window.append(clock, el("span", undefined, en ? "Play combat tricks now" : "Jetzt Kampftricks spielen")); copy.append(window);
+    }
   } else {
     copy.append(el("h2", undefined, state.stage === "finished" ? (en ? "Guild complete" : "Gilde am Ziel") : (en ? "Ready for an adventure?" : "Bereit fürs Abenteuer?")));
     copy.append(el("p", undefined, state.stage === "finished" ? (en ? "The victory belongs to " + (state.winnerName ?? "the guild") + "." : "Der Sieg gehört " + (state.winnerName ?? "der Gilde") + ".") : (en ? "Open the door from your phone to reveal what waits inside." : "Öffne die Tür auf deinem Handy und sieh, was dahinter wartet.")));
@@ -176,7 +199,29 @@ function draw(root: HTMLElement, app: HostState, en: boolean, reveal: boolean): 
   piles.append(doorPile, treasurePile);
   const support = el("section", "dg-support");
   support.append(el("h3", undefined, en ? "At the table" : "Am Tisch"));
-  support.append(el("p", "dg-support-text", state.helperName ? (en ? state.helperName + " is helping; rewards are shared." : state.helperName + " hilft mit; die Beute wird geteilt.") : state.currentMonster ? (en ? "The party needs more strength than the monster." : "Die Gruppe braucht mehr Stärke als das Monster.") : (en ? "Choose your next move on your phone." : "Wähle deinen nächsten Zug am Handy.")));
+  if (state.lastEscape) {
+    const event = state.lastEscape;
+    const escape = el("div", "dg-escape " + (event.success ? "is-success" : "is-failure") + (motion.rollElapsed !== undefined ? " is-rolling" : ""));
+    escape.setAttribute("aria-live", "polite"); escape.setAttribute("aria-busy", String(motion.rollElapsed !== undefined));
+    if (motion.rollElapsed !== undefined) escape.style.setProperty("--dg-roll-delay", `-${motion.rollElapsed / 1000}s`);
+    const die = el("div", "dg-die"); die.dataset.face = String(event.roll); die.setAttribute("role", "img"); die.setAttribute("aria-label", (en ? "Roll: " : "Wurf: ") + event.roll);
+    for (let pip = 1; pip <= 9; pip++) die.append(el("span", "pip pip" + pip));
+    const escapeCopy = el("div", "dg-escape-copy"); escapeCopy.append(el("small", undefined, event.playerName + (en ? " · escape" : " · Flucht")), el("span", "dg-escape-pending", en ? "Rolling…" : "Würfelt…"));
+    const result = el("div", "dg-escape-result"); result.append(el("strong", undefined, event.success ? (en ? "Escape succeeded" : "Flucht gelungen") : (en ? "Escape failed" : "Flucht gescheitert")));
+    const penalties: Record<string, [string, string]> = { "lose-level": ["Eine Stufe verloren", "Lost one level"], "lose-two": ["Zwei Stufen verloren", "Lost two levels"], "lose-gear": ["Ausrüstung verloren", "Lost gear"], death: ["Figur ausgeschieden · Rückkehr im nächsten Zug", "Knocked out · returns next turn"] };
+    result.append(el("p", undefined, event.roll + " / " + event.target + "+" + (!event.success ? " · " + (penalties[event.badStuff ?? "lose-level"] ?? penalties["lose-level"])[en ? 1 : 0] : "")));
+    escapeCopy.append(result); escape.append(die, escapeCopy); support.append(escape);
+  }
+  const plays = el("div", "dg-table-plays");
+  for (const play of [...(state.tablePlays ?? [])].slice(-3).reverse()) {
+    const card = el("article", "dg-table-play" + (play.id === motion.newPlayId ? " is-new" : "") + (play.combatSide === "monster" ? " is-monster" : ""));
+    const art = image(play.card.artPath, "", ""); if (art) card.append(art);
+    const info = el("div"); info.append(el("small", undefined, play.playerName), el("strong", undefined, play.card.title));
+    if (play.combatSide) info.append(el("p", undefined, (play.combatSide === "monster" ? (en ? "Monster" : "Monster") : (en ? "Party" : "Gruppe")) + " +" + (play.card.bonus ?? 0)));
+    card.append(info); plays.append(card);
+  }
+  if (!state.tablePlays?.length) plays.append(el("p", "dg-table-empty", en ? "Played cards appear here." : "Hier liegen ausgespielte Karten."));
+  support.append(plays);
   if (state.faceDownLoot) support.append(el("span", "dg-event-badge", state.faceDownLoot + (en ? " hidden rewards" : " verdeckte Belohnungen")));
   const rules = el("details", "dg-rules");
   rules.append(el("summary", undefined, en ? "How to play" : "So wird gespielt"));
@@ -204,30 +249,60 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
   styleNode.textContent = style;
   root.className = "dg-root";
   let previous: DungeonGuildPublicState | undefined;
-  let lastCueKey = "";
+  let previousView = "";
+  let doorStartedAt = 0;
+  let playStartedAt = 0;
+  let rollStartedAt = 0;
+  let escapeSoundTimer: ReturnType<typeof setTimeout> | undefined;
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const updateClock = () => {
+    for (const clock of Array.from(root.querySelectorAll<HTMLElement>(".dg-combat-countdown"))) {
+      clock.textContent = Math.max(0, Math.ceil((Number(clock.dataset.deadline) - Date.now()) / 1000)) + "s";
+    }
+    const event = previous?.lastEscape;
+    const die = root.querySelector<HTMLElement>(".dg-die");
+    if (!event || !die) return;
+    const elapsed = Date.now() - rollStartedAt;
+    const rolling = !reducedMotion && elapsed < 1200;
+    die.dataset.face = String(rolling ? Math.floor(elapsed / 80) % 6 + 1 : event.roll);
+    const escape = root.querySelector<HTMLElement>(".dg-escape");
+    escape?.classList.toggle("is-rolling", rolling);
+    escape?.setAttribute("aria-busy", String(rolling));
+  };
   const render = (next: unknown) => {
     const app = next as HostState;
     const state = app.game?.state as DungeonGuildPublicState | undefined;
-    const previousReveal = previous?.revealedDoorCard?.id;
-    const currentReveal = state?.revealedDoorCard?.id;
-    const reveal = Boolean(state?.revealedDoorCard && (previousReveal !== currentReveal || previous?.turnNumber !== state.turnNumber));
-    let cue: Cue | undefined;
-    if (reveal) cue = "door";
-    else if (state?.message !== previous?.message && state?.message.toLowerCase().includes("entkomm")) cue = "escape";
-    else if (previous?.currentMonster && !state?.currentMonster && state?.message !== previous.message) cue = "combat";
-    const cueKey = cue ? [state?.turnNumber, state?.stage, state?.message].join(":") : "";
-    if (cue && cueKey !== lastCueKey) {
-      playCue(cue);
-      lastCueKey = cueKey;
+    const view = JSON.stringify({ state, phase: app.game?.phase, language: app.room?.language });
+    if (view === previousView) return;
+    previousView = view;
+    const now = Date.now();
+    const reveal = Boolean(previous && state?.revealedDoorCard && state.doorRevealNumber !== previous.doorRevealNumber);
+    const newPlay = state?.tablePlays?.at(-1);
+    if (previous && newPlay && newPlay.id !== previous.tablePlays?.at(-1)?.id) playStartedAt = now;
+    const escape = state?.lastEscape;
+    const newEscape = Boolean(previous && escape && escape.id !== previous.lastEscape?.id);
+    if (reveal) { doorStartedAt = now; playCue("door"); }
+    if (newEscape && escape) {
+      rollStartedAt = now;
+      if (escapeSoundTimer) clearTimeout(escapeSoundTimer);
+      escapeSoundTimer = setTimeout(() => playCue(escape.success ? "escape" : "escape-failed"), reducedMotion ? 0 : 1200);
+    } else if (previous?.currentMonster && !state?.currentMonster && state?.stage !== "door") {
+      playCue("combat");
     }
     const wrapper = document.createElement("div");
-    draw(wrapper, app, app.room?.language === "en", reveal);
+    draw(wrapper, app, app.room?.language === "en", {
+      doorElapsed: !reducedMotion && state?.revealedDoorCard && now - doorStartedAt < 1000 ? now - doorStartedAt : undefined,
+      newPlayId: !reducedMotion && now - playStartedAt < 500 ? newPlay?.id : undefined,
+      rollElapsed: !reducedMotion && escape && now - rollStartedAt < 1200 ? now - rollStartedAt : undefined
+    });
     root.replaceChildren(styleNode, ...Array.from(wrapper.childNodes));
     previous = state;
+    updateClock();
   };
   render(source.getState());
   const unsubscribe = source.subscribe(render);
-  return () => { unsubscribe(); root.replaceChildren(); };
+  const clockTimer = setInterval(updateClock, 80);
+  return () => { unsubscribe(); clearInterval(clockTimer); if (escapeSoundTimer) clearTimeout(escapeSoundTimer); root.replaceChildren(); };
 }
 
 export const hostGame: HostGame = { id: dungeonGuildManifest.id, mountDom: mountDungeonGuildHost };
