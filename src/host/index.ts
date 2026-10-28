@@ -1,6 +1,7 @@
 import type { HostGame, HostGameStateSource } from "@open-party-lab/game-core";
 import { dungeonGuildManifest } from "../manifest.js";
 import type { DungeonGuildPublicState, GuildCard } from "../protocol.js";
+import { createDungeonScene, type DungeonScene } from "./DungeonScene.js";
 
 interface HostState { game?: { phase?: string; state?: unknown } | null; room?: { language?: "de" | "en" } | null; }
 
@@ -14,6 +15,9 @@ const style = `
 .dg-escape{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:12px;padding:10px;border:1px solid #94723f;border-radius:12px;background:#211c16;margin-bottom:9px}.dg-escape.is-success{border-color:#8caa73}.dg-escape.is-failure{border-color:#b56851}.dg-die{position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:4px;width:60px;height:60px;padding:10px;border:2px solid #efca87;border-radius:12px;background:linear-gradient(140deg,#f7e8c6,#c6a470);box-shadow:0 6px 10px #0006;transform:rotate(-5deg)}.dg-die .pip{width:8px;height:8px;align-self:center;justify-self:center;border-radius:50%;background:#3a291b;opacity:0}.dg-die[data-face="1"] .pip5,.dg-die[data-face="2"] .pip1,.dg-die[data-face="2"] .pip9,.dg-die[data-face="3"] .pip1,.dg-die[data-face="3"] .pip5,.dg-die[data-face="3"] .pip9,.dg-die[data-face="4"] .pip1,.dg-die[data-face="4"] .pip3,.dg-die[data-face="4"] .pip7,.dg-die[data-face="4"] .pip9,.dg-die[data-face="5"] .pip1,.dg-die[data-face="5"] .pip3,.dg-die[data-face="5"] .pip5,.dg-die[data-face="5"] .pip7,.dg-die[data-face="5"] .pip9,.dg-die[data-face="6"] .pip1,.dg-die[data-face="6"] .pip3,.dg-die[data-face="6"] .pip4,.dg-die[data-face="6"] .pip6,.dg-die[data-face="6"] .pip7,.dg-die[data-face="6"] .pip9{opacity:1}.dg-escape-copy small{display:block;color:#bca984;font:700 10px system-ui}.dg-escape-result strong{display:block;margin:4px 0;color:#e7d5b2;font:700 15px Georgia,serif}.is-success .dg-escape-result strong{color:#c1d6a4}.is-failure .dg-escape-result strong{color:#efa78e}.dg-escape-result p{color:#c5b594;font:10px/1.3 system-ui}.dg-escape-pending{display:none;color:#e0ba76;font:700 14px Georgia,serif}.dg-escape.is-rolling .dg-die{animation:dg-dice-roll 1.2s ease-out both;animation-delay:var(--dg-roll-delay,0s)}.dg-escape.is-rolling .dg-escape-result{visibility:hidden}.dg-escape.is-rolling .dg-escape-pending{display:block;position:absolute;margin-top:8px}.dg-support h3{margin:0 0 3px}
 @keyframes dg-door-open-left{from{transform:rotateY(0)}to{transform:rotateY(-112deg)}}@keyframes dg-door-open-right{from{transform:rotateY(0)}to{transform:rotateY(112deg)}}@keyframes dg-card-to-table{from{opacity:0;transform:translateX(50px) translateY(-18px) rotate(8deg) scale(.75)}to{opacity:1;transform:translateX(0) translateY(0) rotate(0) scale(1)}}@keyframes dg-dice-roll{0%{transform:translateY(-20px) rotate(-180deg) scale(.6)}30%{transform:translateY(4px) rotate(100deg) scale(1.05)}55%{transform:translateY(-8px) rotate(-55deg)}80%{transform:translateY(2px) rotate(15deg)}100%{transform:translateY(0) rotate(-5deg)}}
 @media(max-width:660px){.dg-side{grid-template-rows:auto auto auto}.dg-support{max-height:360px}.dg-table-play{grid-template-columns:48px minmax(0,1fr);min-height:61px}.dg-table-play img{width:48px;height:48px}.dg-table-play strong{font-size:12px}}
+.dg-encounter{grid-template-columns:minmax(0,1.45fr) minmax(180px,.8fr);gap:clamp(10px,1.6vw,24px);padding:clamp(10px,1.4vw,20px)}.dg-door-scene{width:100%;min-height:320px;isolation:isolate}.dg-three-stage{position:absolute;inset:0;z-index:5;overflow:hidden;background:radial-gradient(ellipse at 50% 65%,#5260663b,transparent 65%)}.dg-three-stage canvas{display:block;width:100%;height:100%}.dg-door-scene.has-three{perspective:none}.dg-door-scene.has-three::after,.dg-door-scene.has-three>.dg-door-card,.dg-door-scene.has-three>.dg-door-placeholder,.dg-door-scene.has-three>.dg-door-leaf{display:none}.dg-encounter h2{font-size:clamp(27px,3.3vw,52px)}
+@media(max-width:960px){.dg-encounter{grid-template-columns:1fr;grid-template-rows:minmax(280px,1fr) auto}.dg-door-scene{min-height:280px}.dg-encounter-copy{padding-bottom:8px}}
+@media(max-width:660px){.dg-encounter{grid-template-columns:1fr;grid-template-rows:minmax(260px,1fr) auto}.dg-door-scene{min-height:260px}.dg-encounter h2{font-size:28px}}
 @media(prefers-reduced-motion:reduce){.dg *{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}`;
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -254,6 +258,7 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
   let playStartedAt = 0;
   let rollStartedAt = 0;
   let escapeSoundTimer: ReturnType<typeof setTimeout> | undefined;
+  let dungeon: DungeonScene | null | undefined;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const updateClock = () => {
     for (const clock of Array.from(root.querySelectorAll<HTMLElement>(".dg-combat-countdown"))) {
@@ -295,6 +300,18 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
       newPlayId: !reducedMotion && now - playStartedAt < 500 ? newPlay?.id : undefined,
       rollElapsed: !reducedMotion && escape && now - rollStartedAt < 1200 ? now - rollStartedAt : undefined
     });
+    const scene = wrapper.querySelector<HTMLElement>(".dg-door-scene");
+    if (scene && state) {
+      // Reuse the canvas across public-state redraws; never restart the WebGL renderer.
+      if (dungeon === undefined) dungeon = createDungeonScene();
+      if (dungeon) {
+        scene.classList.toggle("has-three", !dungeon.element.hidden);
+        scene.append(dungeon.element);
+        dungeon.update(state, app.room?.language === "en");
+      }
+    } else if (dungeon) {
+      dungeon.dispose(); dungeon = undefined;
+    }
     root.replaceChildren(styleNode, ...Array.from(wrapper.childNodes));
     previous = state;
     updateClock();
@@ -302,7 +319,7 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
   render(source.getState());
   const unsubscribe = source.subscribe(render);
   const clockTimer = setInterval(updateClock, 80);
-  return () => { unsubscribe(); clearInterval(clockTimer); if (escapeSoundTimer) clearTimeout(escapeSoundTimer); root.replaceChildren(); };
+  return () => { unsubscribe(); clearInterval(clockTimer); if (escapeSoundTimer) clearTimeout(escapeSoundTimer); dungeon?.dispose(); root.replaceChildren(); };
 }
 
 export const hostGame: HostGame = { id: dungeonGuildManifest.id, mountDom: mountDungeonGuildHost };
