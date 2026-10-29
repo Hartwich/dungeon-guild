@@ -41,6 +41,7 @@ export interface GuildPlayerState {
   dead?: boolean;
 }
 export interface GuildState extends BaseRoundState {
+  language: "de" | "en";
   currentIndex: number;
   stage: DungeonGuildStage;
   players: GuildPlayerState[];

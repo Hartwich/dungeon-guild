@@ -1,7 +1,9 @@
+import { dungeonGuildText } from "./catalogText.js";
 import type { GameManifest } from "@open-party-lab/game-core";
 
 export const dungeonGuildManifest = {
   id: "dungeon-guild",
+  translations: dungeonGuildText,
   displayName: "Dungeon-Gilde",
   description: "Öffnet Türen, sammelt Ausrüstung und schließt wacklige Bündnisse. Wer zuerst Stufe 10 erreicht, gewinnt.",
   minPlayers: 3,
