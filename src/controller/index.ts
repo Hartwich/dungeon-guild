@@ -24,6 +24,7 @@ function layoutCard(card: GuildCard, playable = false, hint?: string) {
     escapeTarget: card.escapeTarget,
     badStuff: card.badStuff,
     goldValue: card.goldValue,
+    treasureCount: card.treasureCount,
     slot: card.slot,
     twoHand: card.twoHand,
     equipped: card.equipped,
@@ -54,6 +55,14 @@ export const controllerGame = {
       canAct: Boolean(isPlaying && game.canAct),
       ownLevel: game.ownLevel ?? own?.level ?? 1,
       ownStrength: game.ownStrength ?? own?.strength ?? 1,
+      saleValue: [...(own?.equipment ?? []), ...(game.ownHand ?? [])].filter((card) => card.kind === "item").reduce((sum, card) => sum + (card.goldValue ?? 0), 0),
+      combatPending: Boolean(game.combatPending),
+      combatPassed: Boolean(game.combatPassed?.includes(playerId)),
+      combatWaitingNames: (game.combatWaiting ?? []).map((id) => game.players?.find((player) => player.id === id)?.name ?? id),
+      helpRequested: game.stage === "help",
+      helperName: game.helperName,
+      helperOffer: game.helperOffer ?? 0,
+      playerTargets: [...(own && !own.dead ? [own] : []), ...(game.players ?? []).filter((player) => !player.dead && player.id !== playerId)].map((player) => ({ id: player.id, name: player.name })),
       dead: Boolean(own?.dead),
       classCard: own?.classCard ? layoutCard(own.classCard) : null,
       raceCard: own?.raceCard ? layoutCard(own.raceCard) : null,
@@ -67,7 +76,10 @@ export const controllerGame = {
         input({ ...options, type: "dungeon-guild:play", playerId, cardId, sentAt: Date.now() });
       },
       onAction(actionId: string) {
-        input({ type: "dungeon-guild:action", playerId, actionId, sentAt: Date.now() });
+        input({ type: "dungeon-guild:action", playerId, actionId, sentAt: Date.now(), combatRevision: game.combatRevision });
+      },
+      onSellCards(cardIds: string[]) {
+        input({ type: "dungeon-guild:sell", playerId, cardIds, sentAt: Date.now() });
       }
     };
   }

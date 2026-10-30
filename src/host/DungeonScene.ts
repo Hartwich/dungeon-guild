@@ -1,6 +1,7 @@
 import * as T from "three";
 import type { DungeonGuildPublicState } from "../protocol.js";
 import { box, createMiniature, cylinder, disposeObjects, material, mesh, orb, type Miniature } from "./miniatures.js";
+import { createAdventurer } from "./adventurers.js";
 
 /** A persistent host-only diorama. Gameplay and outcomes remain server-authoritative. */
 export class DungeonScene {
@@ -28,8 +29,10 @@ export class DungeonScene {
   private width = 0;
   private height = 0;
   private needsRender = true;
+  private party = new T.Group();
+  private partyKey = "";
 
-  constructor() {
+  constructor(private readonly mode: "dungeon" | "party" = "dungeon") {
     this.element.className = "dg-three-stage";
     this.element.setAttribute("role", "img");
     this.renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
@@ -49,7 +52,8 @@ export class DungeonScene {
     Object.assign(sun.shadow.camera, { left: -5, right: 5, top: 6, bottom: -4, near: .1, far: 20 });
     sun.shadow.normalBias = .035; this.scene.add(sun);
     const rim = new T.DirectionalLight("#95b9d3", 2.4); rim.position.set(3, 4, -4); this.scene.add(rim);
-    this.buildDungeon();
+    if (mode === "dungeon") this.buildDungeon();
+    else this.scene.add(this.party);
     this.observer = new ResizeObserver(() => this.resize()); this.observer.observe(this.element);
     this.renderer.domElement.addEventListener("webglcontextlost", this.onContextLost);
     this.renderer.domElement.addEventListener("webglcontextrestored", this.onContextRestored);
@@ -116,8 +120,23 @@ export class DungeonScene {
 
   update(state: DungeonGuildPublicState, en: boolean): void {
     this.needsRender = true;
-    const card = state.currentMonster ?? state.revealedDoorCard;
+    const card = state.currentMonster ?? (state.revealedDoorCard?.kind === "monster" ? null : state.revealedDoorCard);
     const now = performance.now();
+    if (this.mode === "party") {
+      const fighters = state.players.filter((p) => p.id === state.activePlayerId || p.id === state.helperId);
+      const key = JSON.stringify(fighters.map((player) => ({ id: player.id, color: player.color, equipment: player.equipment, classCard: player.classCard, raceCard: player.raceCard })));
+      if (key !== this.partyKey) {
+        disposeObjects(this.party); this.party.clear();
+        fighters.forEach((player, i) => {
+          const figure = createAdventurer(player);
+          figure.position.x = fighters.length === 1 ? 0 : (i === 0 ? -.78 : .78);
+          figure.rotation.y = i === 0 ? -.12 : .12; this.party.add(figure);
+        });
+        this.partyKey = key;
+      }
+      this.element.setAttribute("aria-label", (en ? "Fighting characters: " : "Kämpfende Charaktere: ") + fighters.map((p) => p.name).join(", "));
+      this.resize(); return;
+    }
     const nextKey = card?.id ?? "";
     const reveal = this.revealKey >= 0 && this.revealKey !== state.doorRevealNumber && Boolean(state.revealedDoorCard);
     const initial = this.revealKey < 0;
@@ -163,8 +182,9 @@ export class DungeonScene {
     const angle = this.open ? eased * 1.86 : 0;
     this.left.rotation.y = -angle; this.right.rotation.y = angle;
     const distance = Math.max(1, .92 / this.camera.aspect);
-    this.camera.position.set(.38 + Math.sin(time * .24) * .15, 3.7, 9.6 * distance);
-    this.camera.lookAt(0, 1.5, -.1);
+    this.camera.position.set(.38 + Math.sin(time * .24) * .15, this.mode === "party" ? 2.5 : 3.7, (this.mode === "party" ? 6.4 : 9.6) * distance);
+    this.camera.lookAt(0, this.mode === "party" ? 1.3 : 1.5, -.1);
+    this.party.rotation.y = Math.sin(time * .5) * .04;
     this.flames.forEach((flame, i) => {
       flame.scale.y = 1.8 + Math.sin(time * 8 + i * 2) * .18;
       this.torchLights[i].intensity = 7 + Math.sin(time * 6.3 + i) * .65;
@@ -208,7 +228,7 @@ export class DungeonScene {
   }
 }
 
-export function createDungeonScene(): DungeonScene | null {
-  try { return new DungeonScene(); }
+export function createDungeonScene(mode: "dungeon" | "party" = "dungeon"): DungeonScene | null {
+  try { return new DungeonScene(mode); }
   catch { return null; } // Existing illustrated door remains usable without WebGL.
 }

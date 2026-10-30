@@ -19,7 +19,9 @@ export interface GuildCard {
   levelReward?: number;
   escapeTarget?: number;
   badStuff?: "lose-level" | "lose-two" | "lose-gear" | "death";
+  curseEffect?: "lose-level" | "lose-head" | "lose-body" | "lose-feet" | "lose-two" | "lose-backpack";
   goldValue?: number;
+  treasureCount?: number;
   slot?: "head" | "body" | "hands" | "feet" | "other";
   oneHand?: boolean;
   twoHand?: boolean;
@@ -41,6 +43,8 @@ export interface GuildPlayerState {
   dead?: boolean;
 }
 export interface GuildState extends BaseRoundState {
+  allowWinningHelp: boolean;
+  fastPlay: boolean;
   language: "de" | "en";
   currentIndex: number;
   stage: DungeonGuildStage;
@@ -58,10 +62,13 @@ export interface GuildState extends BaseRoundState {
   escapeNumber: number;
   partyBonuses: number;
   monsterBonuses: number;
-  combatEndsAt: number | null;
+  combatPending: boolean;
+  combatRevision: number;
+  combatPassed: string[];
+  helpOffers: string[];
   helperId: string | null;
   helperOffer: number;
-  helpEndsAt: number | null;
+  escapeEvents: GuildEscapeEvent[];
   faceDownLoot: string[];
   doorCombat: boolean;
   roomLooted: boolean;
@@ -71,6 +78,8 @@ export interface GuildState extends BaseRoundState {
 }
 export interface GuildPublicPlayer extends Omit<GuildPlayerState, "hand"> { handCount: number; strength: number; }
 export interface DungeonGuildPublicState {
+  allowWinningHelp: boolean;
+  fastPlay: boolean;
   rulesetId: string;
   title: string;
   deckLabel: string;
@@ -101,10 +110,15 @@ export interface DungeonGuildPublicState {
   monsterBonuses: number;
   partyStrength: number;
   monsterStrength: number;
-  combatEndsAt: number | null;
+  combatPending: boolean;
+  combatRevision: number;
+  combatPassed: string[];
+  combatWaiting: string[];
+  helpOffers: string[];
+  helperId: string | null;
   helperName: string | null;
   helperOffer: number;
-  helpEndsAt: number | null;
+  escapeEvents: GuildEscapeEvent[];
   faceDownLoot: number;
   message: string;
 }
@@ -126,5 +140,6 @@ export interface DungeonGuildHandCard extends CardTableHandCardState {
 }
 export type DungeonGuildClientState = DungeonGuildControllerState;
 export type DungeonGuildInput =
-  | { type: "dungeon-guild:action"; playerId: string; actionId: string; sentAt: number }
+  | { type: "dungeon-guild:action"; playerId: string; actionId: string; sentAt: number; combatRevision?: number }
+  | { type: "dungeon-guild:sell"; playerId: string; cardIds: string[]; sentAt: number }
   | ({ type: "dungeon-guild:play"; playerId: string; cardId: string; sentAt: number } & GuildPlayOptions);
