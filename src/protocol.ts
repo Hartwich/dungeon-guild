@@ -4,6 +4,7 @@ import type {
   CardTableStackState
 } from "@open-party-lab/protocol";
 import type { BaseRoundState } from "@open-party-lab/game-core";
+import type { SupportedLanguage } from "@open-party-lab/game-core";
 
 export type DungeonGuildStage = "door" | "combat" | "help" | "loot" | "main" | "finished";
 export type GuildCombatSide = "party" | "monster";
@@ -45,7 +46,7 @@ export interface GuildPlayerState {
 export interface GuildState extends BaseRoundState {
   allowWinningHelp: boolean;
   fastPlay: boolean;
-  language: "de" | "en";
+  language: SupportedLanguage;
   currentIndex: number;
   stage: DungeonGuildStage;
   players: GuildPlayerState[];

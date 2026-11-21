@@ -39,7 +39,7 @@ export const controllerGame = {
   buildLayout({ state, onInput }: ControllerContext) {
     const playerId = state.player?.id ?? "";
     const game = (state.game?.state ?? {}) as Partial<DungeonGuildClientState>;
-    const en = state.room?.language === "en";
+    const en = state.room?.language !== "de";
     const own = game.players?.find((player) => player.id === playerId);
     const isPlaying = state.game?.phase === "playing";
     const input = (value: DungeonGuildInput) => onInput({ ...value, playerId, sentAt: Date.now() });

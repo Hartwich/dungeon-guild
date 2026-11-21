@@ -313,7 +313,7 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
       playCue("combat");
     }
     const wrapper = document.createElement("div");
-    draw(wrapper, app, app.room?.language === "en", {
+    draw(wrapper, app, app.room?.language !== "de", {
       doorElapsed: !reducedMotion && state?.revealedDoorCard && now - doorStartedAt < 1000 ? now - doorStartedAt : undefined,
       newPlayId: !reducedMotion && now - playStartedAt < 500 ? newPlay?.id : undefined,
       rollElapsed: !reducedMotion && escape && now - rollStartedAt < 1200 ? now - rollStartedAt : undefined
@@ -325,7 +325,7 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
       if (dungeon) {
         scene.classList.toggle("has-three", !dungeon.element.hidden);
         scene.append(dungeon.element);
-        dungeon.update(state, app.room?.language === "en");
+        dungeon.update(state, app.room?.language !== "de");
       }
     } else if (dungeon) {
       dungeon.dispose(); dungeon = undefined;
@@ -333,7 +333,7 @@ export function mountDungeonGuildHost(rootInput: unknown, source: HostGameStateS
     const partyScene = wrapper.querySelector<HTMLElement>(".dg-party-scene");
     if (partyScene && state) {
       if (party === undefined) party = createDungeonScene("party");
-      if (party) { partyScene.classList.toggle("has-three", !party.element.hidden); partyScene.append(party.element); party.update(state, app.room?.language === "en"); }
+      if (party) { partyScene.classList.toggle("has-three", !party.element.hidden); partyScene.append(party.element); party.update(state, app.room?.language !== "de"); }
     } else if (party) { party.dispose(); party = undefined; }
     root.replaceChildren(styleNode, ...Array.from(wrapper.childNodes));
     previous = state;
